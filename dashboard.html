@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Pemantauan Pintar - SOS-IoT Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --purple: #a855f7;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation */
+        nav {
+            background-color: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 4.5rem;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .nav-logo i {
+            color: var(--danger);
+            font-size: 1.5rem;
+        }
+
+        .nav-logo span {
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-links a.active {
+            color: #fff;
+            background-color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Dashboard Wrapper */
+        .dashboard-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        /* Live Header Status */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dashboard-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .dashboard-title p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .system-pulse-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: var(--bg-card);
+            padding: 0.75rem 1.25rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .pulse-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+
+        .pulse-dot.danger {
+            background-color: var(--danger);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .col-span-2 {
+            grid-column: span 2;
+        }
+
+        /* Cards Styling */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header h2 i {
+            color: var(--primary);
+        }
+
+        /* Zone Monitoring Cards */
+        .zone-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .zone-box {
+            background-color: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .zone-box.alarm-active {
+            border-color: var(--danger);
+            background-color: rgba(239, 68, 68, 0.05);
+            animation: borderFlash 1s infinite alternate;
+        }
+
+        .zone-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .zone-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .zone-loc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+        }
+
+        .status-pill {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+
+        .pill-success { background-color: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .pill-danger { background-color: rgba(239, 68, 68, 0.15); color: #f87171; animation: textFlash 0.8s infinite alternate; }
+
+        .zone-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .zone-details span strong {
+            color: var(--text-main);
+        }
+
+        /* Simulator Interface */
+        .simulator-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .sim-btn {
+            width: 100%;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-trigger {
+            background-color: var(--danger);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-trigger:hover { background-color: #dc2626; }
+
+        .btn-reset {
+            background-color: var(--success);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-reset:hover { background-color: #059669; }
+
+        /* Logs Table Section */
+        .logs-section {
+            margin-top: 1.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: rgba(15, 23, 42, 0.6);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #a855f7;
+        }
+
+        /* Live Global Banner Alert */
+        .global-alert-banner {
+            background: linear-gradient(to right, #b91c1c, #7f1d1d);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .global-alert-banner i {
+            animation: spin 2s linear infinite;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #090d16;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+
+        /* Keyframes Animations */
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes borderFlash {
+            from { border-color: var(--danger); box-shadow: 0 0 4px rgba(239, 68, 68, 0.2); }
+            to { border-color: #f87171; box-shadow: 0 0 12px rgba(239, 68, 68, 0.6); }
+        }
+
+        @keyframes textFlash {
+            from { opacity: 1; }
+            to { opacity: 0.4; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Layouts */
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .col-span-2 { grid-column: auto; }
+        }
+
+        @media (max-width: 640px) {
+            .nav-links { display: none; }
+            .zone-grid { grid-template-columns: 1fr; }
+            .dashboard-header { flex-direction: column; align-items: flex-start; }
+            .system-pulse-container { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Global Emergency Banner System -->
+    <div id="globalAlert" class="global-alert-banner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>AMARAN KECEMASAN AKTIF: PENGGERA DI ZON A (TANDAS LELAKI) SEDANG BERBUNYI!</span>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>SOS-IoT Control Room</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Info Produk</a>
+                <a href="dashboard_telegram.html">Telegram Dashboard</a>
+                <a href="dashboard_simple.html" class="active">Simple Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Body -->
+    <div class="dashboard-container">
+        
+        <!-- Top Status Bar -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <h1>Live Monitoring Control Panel</h1>
+                <p>Status perkakasan IoT dan pengurusan maklum balas kecemasan bangunan.</p>
+            </div>
+            <div class="system-pulse-container">
+                <div class="pulse-item">
+                    <div id="statusDot" class="pulse-dot"></div>
+                    <span id="statusText">Gateway: Online</span>
+                </div>
+                <div class="pulse-item" style="border-left: 1px solid var(--border); padding-left: 1rem;">
+                    <i class="fa-solid fa-clock text-muted" style="color:var(--primary)"></i>
+                    <span id="liveClock" style="margin-left: 0.4rem; font-family: monospace;">00:00:00 AM</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Grid Sections -->
+        <div class="dashboard-grid">
+            
+            <!-- Column 1 & 2: Pemantauan Zon -->
+            <div class="card col-span-2">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-layer-group"></i> Status Keselamatan Mengikut Zon</h2>
+                    <span class="text-muted text-xs" style="font-size: 0.8rem;"><i class="fa-solid fa-circle text-emerald-400"></i> Total Peranti: 2 Unit</span>
+                </div>
+                
+                <div class="zone-grid">
+                    <!-- Zone A -->
+                    <div id="zoneA" class="zone-box">
+                        <div class="zone-top">
+                            <div>
+                                <div class="zone-name">Zon A - Tandas Lelaki</div>
+                                <div class="zone-loc">Aras Bawah, Blok Utama</div>
+                            </div>
+                            <span id="badgeA" class="status-pill pill-success">Selamat</span>
+                        </div>
+                        <div class="zone-details">
+                            <span>Hardware: <strong>ESP32 Node-01</strong></span>
+                            <span>Siren Siren: <strong id="sirenA">OFF</strong></span>
+                            <span>Kemaskini Terakhir: <strong class="last-time">Masa Nyata</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Zone B -->
+                    <div id="zoneB" class="zone-box">
+                        <div class="zone-top">
+                            <div>
+                                <div class="zone-name">Zon B - Tandas Wanita</div>
+                                <div class="zone-loc">Aras Bawah, Blok Utama</div>
+                            </div>
+                            <span id="badgeB" class="status-pill pill-success">Selamat</span>
+                        </div>
+                        <div class="zone-details">
+                            <span>Hardware: <strong>ESP32 Node-02</strong></span>
+                            <span>Siren Siren: <strong id="sirenB">OFF</strong></span>
+                            <span>Kemaskini Terakhir: <strong class="last-time">Masa Nyata</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 3: Live Simulator Perkakasan -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-microchip"></i> Simulator Hardware IoT</h2>
+                </div>
+                <p class="text-muted" style="font-size: 0.85rem; margin-top: -0.75rem; margin-bottom: 1.5rem; line-height: 1.4;">
+                    Gunakan butang di bawah untuk menguji aliran logik log amaran pintu dan imbasan maklum balas kad RFID.
+                </p>
+                <div class="simulator-controls">
+                    <button id="btnSimulateTrigger" class="sim-btn btn-trigger" onclick="triggerEmergencySimulator()">
+                        <i class="fa-solid fa-radiation"></i> Tekan Butang SOS (Zon A)
+                    </button>
+                    <button id="btnSimulateReset" class="sim-btn btn-reset" onclick="resetEmergencySimulator()" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                        <i class="fa-solid fa-id-card"></i> Imbas Kad RFID Pengawal
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Row 2: Audit Trail Log Sistem -->
+        <div class="card logs-section">
+            <div class="card-header" style="margin-bottom: 0.5rem;">
+                <h2><i class="fa-solid fa-list-check"></i> Audit Trail & Log Aktiviti Sistem</h2>
+                <span class="text-muted text-xs" style="font-size: 0.8rem;"><i class="fa-solid fa-clock-rotate-left"></i> Autolog Terkini</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Masa Rekod</th>
+                            <th>Zon / Lokasi</th>
+                            <th>Jenis Peristiwa (Event)</th>
+                            <th>Status Siren</th>
+                            <th>ID Pengesahan (RFID UID)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody">
+                        <tr>
+                            <td>11:15:22 PM</td>
+                            <td>Zon B - Tandas Wanita</td>
+                            <td>Sistem Boot Selesai & Sambungan Wi-Fi Berjaya</td>
+                            <td><span style="color:var(--text-muted)">STABLE</span></td>
+                            <td class="mono">SYSTEM_INIT</td>
+                        </tr>
+                        <tr>
+                            <td>11:00:10 PM</td>
+                            <td>Zon A - Tandas Lelaki</td>
+                            <td>Sistem Boot Selesai & Sambungan Wi-Fi Berjaya</td>
+                            <td><span style="color:var(--text-muted)">STABLE</span></td>
+                            <td class="mono">SYSTEM_INIT</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Dashboard Footer -->
+    <footer>
+        <p>&copy; 2026 SOS-IoT System Solutions. Paparan Standard Pusat Kawalan.</p>
+        <p style="color: #475569; font-size: 0.7rem; margin-top: 0.25rem;">Gred Respons Industri - Sambungan Web API Aktif via Browser LocalStorage</p>
+    </footer>
+
+    <!-- Interactive Logical Simulation JavaScript Script -->
+    <script>
+        // Realtime Clock Functionality
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // Hour '0' should be '12'
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            seconds = seconds < 10 ? '0'+seconds : seconds;
+            
+            document.getElementById('liveClock').innerText = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Update timestamps in rows initially
+        const nowTimeStr = new Date().toLocaleTimeString();
+        document.querySelectorAll('.last-time').forEach(el => el.innerText = nowTimeStr);
+
+        // Core Simulator States
+        let isEmergency = false;
+
+        function triggerEmergencySimulator() {
+            if (isEmergency) return; // Prevent multiple clicks
+            
+            isEmergency = true;
+            const timeStamp = new Date().toLocaleTimeString();
+
+            // 1. Update Global Alert Banner
+            const banner = document.getElementById('globalAlert');
+            banner.style.display = 'flex';
+
+            // 2. Update Gateway indicator state
+            document.getElementById('statusDot').className = 'pulse-dot danger';
+            document.getElementById('statusText').innerText = 'Gateway: PANIC TRIGGERED';
+
+            // 3. Update Zone A specific elements
+            const zoneBox = document.getElementById('zoneA');
+            zoneBox.classList.add('alarm-active');
+            
+            document.getElementById('badgeA').className = 'status-pill pill-danger';
+            document.getElementById('badgeA').innerText = 'KECEMASAN';
+            document.getElementById('sirenA').innerText = 'ACTIVE (110dB)';
+            document.getElementById('sirenA').style.color = 'var(--danger)';
+
+            // 4. Handle buttons disabled state toggling
+            document.getElementById('btnSimulateTrigger').style.opacity = '0.5';
+            document.getElementById('btnSimulateTrigger').style.cursor = 'not-allowed';
+            document.getElementById('btnSimulateTrigger').disabled = true;
+
+            document.getElementById('btnSimulateReset').style.opacity = '1';
+            document.getElementById('btnSimulateReset').style.cursor = 'pointer';
+            document.getElementById('btnSimulateReset').disabled = false;
+
+            // 5. Append New Event inside the Log Table Row
+            const tableBody = document.getElementById('logTableBody');
+            const newRow = document.createElement('tr');
+            newRow.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            newRow.innerHTML = `
+                <td><strong>${timeStamp}</strong></td>
+                <td>Zon A - Tandas Lelaki</td>
+                <td style="color:var(--danger); font-weight:600;"><i class="fa-solid fa-bell animate-bounce"></i> Butang SOS Ditekan (Tercetus)</td>
+                <td style="color:var(--danger); font-weight:bold;">Siren ON</td>
+                <td class="mono">0x000000</td>
+            `;
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+        }
+
+        function resetEmergencySimulator() {
+            if (!isEmergency) return;
+            
+            isEmergency = false;
+            const timeStamp = new Date().toLocaleTimeString();
+
+            // 1. Clear Global Alert Banner
+            const banner = document.getElementById('globalAlert');
+            banner.style.display = 'none';
+
+            // 2. Revert Gateway indicator state
+            document.getElementById('statusDot').className = 'pulse-dot';
+            document.getElementById('statusText').innerText = 'Gateway: Online';
+
+            // 3. Clean Zone A active alert state classes
+            const zoneBox = document.getElementById('zoneA');
+            zoneBox.classList.remove('alarm-active');
+            
+            document.getElementById('badgeA').className = 'status-pill pill-success';
+            document.getElementById('badgeA').innerText = 'Selamat';
+            document.getElementById('sirenA').innerText = 'OFF';
+            document.getElementById('sirenA').style.color = 'var(--text-main)';
+
+            // 4. Handle buttons restoration toggling
+            document.getElementById('btnSimulateTrigger').style.opacity = '1';
+            document.getElementById('btnSimulateTrigger').style.cursor = 'pointer';
+            document.getElementById('btnSimulateTrigger').disabled = false;
+
+            document.getElementById('btnSimulateReset').style.opacity = '0.5';
+            document.getElementById('btnSimulateReset').style.cursor = 'not-allowed';
+            document.getElementById('btnSimulateReset').disabled = true;
+
+            // 5. Append Reset/Clear confirmation Event inside the Log Table Row
+            const tableBody = document.getElementById('logTableBody');
+            
+            // Remove highlighting decoration on previous row safely
+            if(tableBody.firstChild) {
+                tableBody.firstChild.style.backgroundColor = 'transparent';
+            }
+
+            const newRow = document.createElement('tr');
+            newRow.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            newRow.innerHTML = `
+                <td><strong>${timeStamp}</strong></td>
+                <td>Zon A - Tandas Lelaki</td>
+                <td style="color:var(--success); font-weight:600;"><i class="fa-solid fa-id-card-clip"></i> Siren Dimatikan oleh Pegawai (RFID)</td>
+                <td style="color:var(--success);">Siren OFF</td>
+                <td class="mono">UID_79_FA_2B_8C</td>
+            `;
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+        }
+    </script>
+
+</body>
+</html>
